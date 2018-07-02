@@ -2,13 +2,14 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from usage.models import *
+from datetime import datetime
+from datetime import timezone
 
 @csrf_exempt
 def add(request):
     print('connected')
 
     if request.method != "POST":
-        print('!POST')
         return HttpResponseBadRequest("POST Only")
 
     try:
@@ -21,18 +22,15 @@ def add(request):
         action = request.POST["action"]
         sleep = request.POST["sleep"]
         pid = request.POST["pid"]
-        #login = request.POST["login"]
-        login = 'remove me'
         hashed_username = request.POST["hashed_username"]
-        gmtime = request.POST["gmtime"]
-
+        gmtime_string = request.POST["gmtime"]
+        gmtime_no_zone = datetime.strptime(gmtime_string, '%c')
+        gmtime = gmtime_no_zone.replace(tzinfo=timezone.utc)
         ip =  request.META.get('REMOTE_ADDR', '0.0.0.0')
-        domain = request.META.get('REMOTE_HOST', 'Unknown')
-        print('done with request')
+        domain = request.META.get('REMOTE_HOST', 'unknown')
     except Exception as e:
         print('failed in request')
         print(e)
-
 
     try:
         entry = Entry()
@@ -45,13 +43,11 @@ def add(request):
         entry.action = action
         entry.sleep = sleep
         entry.pid = pid
-        entry.login = login
         entry.hashed_username = hashed_username
         entry.gmtime = gmtime
         entry.ip = ip
         entry.domain = domain
         entry.save()
-        print('done with save')
     except Exception as e:
         print('failed in save')
         print(e)

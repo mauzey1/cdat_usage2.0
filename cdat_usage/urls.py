@@ -20,7 +20,7 @@ from usage import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('add', views.add, name='add'),
+    path('log/add/', views.add, name='add'),
 ]
 
 
